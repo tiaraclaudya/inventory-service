@@ -2,7 +2,7 @@ const axios = require('axios');
 
 // Client untuk komunikasi ke auth-service
 const authClient = axios.create({
-    baseURL: 'http://localhost:3001',
+    baseURL: 'https://auth-service-five-nu.vercel.app',
     timeout: 5000,
     headers: {
         'Content-Type': 'application/json',

@@ -1,17 +1,17 @@
 const Product = require('../models/Product');
 
 const productController = {
-    // Get all products
-    async getAllProducts(req, res) {
+    // Get all product
+    async getAllProduct(req, res) {
         try {
-            const products = await Product.findAll();
+            const product = await Product.findAll();
             res.json({
                 success: true,
-                count: products.length,
-                data: products
+                count: product.length,
+                data: product
             });
         } catch (error) {
-            console.error('Get products error:', error);
+            console.error('Get product error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -71,8 +71,8 @@ const productController = {
         }
     },
 
-    // Search products
-    async searchProducts(req, res) {
+    // Search product
+    async searchProduct(req, res) {
         try {
             const { q } = req.query;
             
@@ -83,16 +83,16 @@ const productController = {
                 });
             }
             
-            const products = await Product.search(q);
+            const product = await Product.search(q);
             
             res.json({
                 success: true,
-                count: products.length,
+                count: product.length,
                 query: q,
-                data: products
+                data: product
             });
         } catch (error) {
-            console.error('Search products error:', error);
+            console.error('Search product error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -101,19 +101,19 @@ const productController = {
     },
 
     // Filter by category
-    async getProductsByCategory(req, res) {
+    async getProductByCategory(req, res) {
         try {
             const { categoryId } = req.params;
-            const products = await Product.findByCategory(categoryId);
+            const product = await Product.findByCategory(categoryId);
             
             res.json({
                 success: true,
-                count: products.length,
+                count: product.length,
                 category_id: categoryId,
-                data: products
+                data: product
             });
         } catch (error) {
-            console.error('Get products by category error:', error);
+            console.error('Get product by category error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -121,17 +121,17 @@ const productController = {
         }
     },
 
-    // Get low stock products
-    async getLowStockProducts(req, res) {
+    // Get low stock product
+    async getLowStockProduct(req, res) {
         try {
             const threshold = req.query.threshold || 10;
-            const products = await Product.findLowStock(parseInt(threshold));
+            const product = await Product.findLowStock(parseInt(threshold));
             
             res.json({
                 success: true,
-                count: products.length,
+                count: product.length,
                 threshold: threshold,
-                data: products
+                data: product
             });
         } catch (error) {
             console.error('Get low stock error:', error);
@@ -142,8 +142,8 @@ const productController = {
         }
     },
 
-    // Get products by price range
-    async getProductsByPriceRange(req, res) {
+    // Get product by price range
+    async getProductByPriceRange(req, res) {
         try {
             const { min, max } = req.query;
             
@@ -154,19 +154,19 @@ const productController = {
                 });
             }
             
-            const products = await Product.findByPriceRange(
+            const product = await Product.findByPriceRange(
                 parseFloat(min), 
                 parseFloat(max)
             );
             
             res.json({
                 success: true,
-                count: products.length,
+                count: product.length,
                 price_range: { min, max },
                 data: products
             });
         } catch (error) {
-            console.error('Get products by price range error:', error);
+            console.error('Get product by price range error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
