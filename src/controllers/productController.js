@@ -1,17 +1,17 @@
 const Product = require('../models/Product');
 
 const productController = {
-    // Get all product
-    async getAllProduct(req, res) {
+    // Get all products
+    async getAllProducts(req, res) {
         try {
-            const product = await Product.findAll();
+            const products = await Product.findAll();
             res.json({
                 success: true,
-                count: product.length,
-                data: product
+                count: products.length,
+                data: products
             });
         } catch (error) {
-            console.error('Get product error:', error);
+            console.error('Get products error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -72,7 +72,7 @@ const productController = {
     },
 
     // Search product
-    async searchProduct(req, res) {
+    async searchProducts(req, res) {
         try {
             const { q } = req.query;
             
@@ -83,16 +83,16 @@ const productController = {
                 });
             }
             
-            const product = await Product.search(q);
+            const products = await Product.search(q);
             
             res.json({
                 success: true,
-                count: product.length,
+                count: products.length,
                 query: q,
-                data: product
+                data: products
             });
         } catch (error) {
-            console.error('Search product error:', error);
+            console.error('Search products error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -101,19 +101,19 @@ const productController = {
     },
 
     // Filter by category
-    async getProductByCategory(req, res) {
+    async getProductsByCategory(req, res) {
         try {
             const { categoryId } = req.params;
-            const product = await Product.findByCategory(categoryId);
+            const products = await Product.findByCategory(categoryId);
             
             res.json({
                 success: true,
-                count: product.length,
+                count: products.length,
                 category_id: categoryId,
-                data: product
+                data: products
             });
         } catch (error) {
-            console.error('Get product by category error:', error);
+            console.error('Get products by category error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -121,17 +121,17 @@ const productController = {
         }
     },
 
-    // Get low stock product
-    async getLowStockProduct(req, res) {
+    // Get low stock products
+    async getLowStockProducts(req, res) {
         try {
             const threshold = req.query.threshold || 10;
-            const product = await Product.findLowStock(parseInt(threshold));
+            const products = await Product.findLowStock(parseInt(threshold));
             
             res.json({
                 success: true,
-                count: product.length,
+                count: products.length,
                 threshold: threshold,
-                data: product
+                data: products
             });
         } catch (error) {
             console.error('Get low stock error:', error);
@@ -142,8 +142,8 @@ const productController = {
         }
     },
 
-    // Get product by price range
-    async getProductByPriceRange(req, res) {
+    // Get products by price range
+    async getProductsByPriceRange(req, res) {
         try {
             const { min, max } = req.query;
             
@@ -154,19 +154,26 @@ const productController = {
                 });
             }
             
-            const product = await Product.findByPriceRange(
-                parseFloat(min), 
-                parseFloat(max)
-            );
+            const minPrice = parseFloat(min);
+            const maxPrice = parseFloat(max);
+            
+            if (isNaN(minPrice) || isNaN(maxPrice)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Min and max must be valid numbers'
+                });
+            }
+            
+            const products = await Product.findByPriceRange(minPrice, maxPrice);
             
             res.json({
                 success: true,
-                count: product.length,
-                price_range: { min, max },
+                count: products.length,
+                price_range: { min: minPrice, max: maxPrice },
                 data: products
             });
         } catch (error) {
-            console.error('Get product by price range error:', error);
+            console.error('Get products by price range error:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error'
@@ -281,12 +288,20 @@ const productController = {
     async updateProductStock(req, res) {
         try {
             const { id } = req.params;
-            const { stock_change } = req.body;
+            const { stock_change, reason } = req.body;
             
             if (stock_change === undefined) {
                 return res.status(400).json({
                     success: false,
                     message: 'Stock change value is required'
+                });
+            }
+            
+            const change = parseInt(stock_change);
+            if (isNaN(change)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Stock change must be a valid number'
                 });
             }
             
@@ -299,7 +314,7 @@ const productController = {
                 });
             }
             
-            const product = await Product.updateStock(id, parseInt(stock_change));
+            const product = await Product.updateStock(id, change, reason || 'Manual adjustment');
             
             res.json({
                 success: true,
@@ -329,6 +344,14 @@ const productController = {
                 });
             }
             
+            // Check if product has stock
+            if (existingProduct.stock > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cannot delete product with existing stock. Clear stock first.'
+                });
+            }
+            
             await Product.delete(id);
             
             res.json({
@@ -344,7 +367,7 @@ const productController = {
         }
     },
 
-    // Get statistics
+    // Get product statistics
     async getStatistics(req, res) {
         try {
             const stats = await Product.getStatistics();
@@ -353,7 +376,10 @@ const productController = {
             res.json({
                 success: true,
                 data: {
-                    ...stats[0],
+                    total_products: stats.total_products || 0,
+                    total_value: stats.total_value || 0,
+                    average_price: stats.average_price || 0,
+                    total_stock: stats.total_stock || 0,
                     low_stock_count: lowStock.length
                 }
             });
