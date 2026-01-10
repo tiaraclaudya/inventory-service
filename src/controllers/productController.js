@@ -345,12 +345,6 @@ const productController = {
             }
             
             // Check if product has stock
-            if (existingProduct.stock > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Cannot delete product with existing stock. Clear stock first.'
-                });
-            }
             
             await Product.delete(id);
             

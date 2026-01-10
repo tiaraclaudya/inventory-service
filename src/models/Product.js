@@ -5,18 +5,18 @@ const Product = {
     async findAll() {
         const sql = `
             SELECT p.*, c.name as category_name 
-            FROM product p
+            FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             ORDER BY p.name
         `;
         return await db.query(sql);
     },
 
-    // Get product by ID
+    // Get products by ID
     async findById(id) {
         const sql = `
             SELECT p.*, c.name as category_name 
-            FROM product p
+            FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.id = ?
         `;
@@ -28,7 +28,7 @@ const Product = {
     async findByCode(product_code) {
         const sql = `
             SELECT p.*, c.name as category_name 
-            FROM product p
+            FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.product_code = ?
         `;
@@ -41,7 +41,7 @@ const Product = {
         const searchTerm = `%${query}%`;
         const sql = `
             SELECT p.*, c.name as category_name 
-            FROM product p
+            FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.name LIKE ? OR p.product_code LIKE ? OR p.description LIKE ?
             ORDER BY p.name
@@ -53,7 +53,7 @@ const Product = {
     async findByCategory(category_id) {
         const sql = `
             SELECT p.*, c.name as category_name 
-            FROM product p
+            FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.category_id = ?
             ORDER BY p.name
@@ -74,7 +74,7 @@ const Product = {
         } = productData;
 
         const result = await db.query(
-            `INSERT INTO product 
+            `INSERT INTO products 
             (product_code, name, category_id, price, stock, description, specifications) 
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [product_code, name, category_id, price, stock, description, 
@@ -97,7 +97,7 @@ const Product = {
         } = productData;
 
         await db.query(
-            `UPDATE product SET 
+            `UPDATE products SET 
             product_code = ?, name = ?, category_id = ?, price = ?, stock = ?, 
             description = ?, specifications = ?
             WHERE id = ?`,
@@ -120,7 +120,7 @@ const Product = {
 
     // Delete product
     async delete(id) {
-        await db.query('DELETE FROM product WHERE id = ?', [id]);
+        await db.query('DELETE FROM products WHERE id = ?', [id]);
         return true;
     },
 
